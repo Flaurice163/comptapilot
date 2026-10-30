@@ -17,8 +17,12 @@ La clé `sb_publishable_...` est publique par conception, mais ce projet la cons
 1. Activer la confirmation d’adresse e-mail.
 2. Définir le **Site URL** sur la même valeur que `APP_URL`.
 3. Ajouter à la liste **Redirect URLs** :
-   - `https://votre-domaine/api/auth`
+   - `https://comptapilot.vercel.app/api/auth`
+   - `https://comptapilot.vercel.app/api/auth?flow=signup`
+   - `https://comptapilot.vercel.app/api/auth?flow=recovery`
    - `http://localhost:3000/api/auth` pour les essais locaux.
+   - `http://localhost:3000/api/auth?flow=signup` et `http://localhost:3000/api/auth?flow=recovery` pour les essais locaux.
+   Remplacer `comptapilot.vercel.app` par le domaine exact attribué au projet dans Vercel s’il est différent.
 4. Adapter le modèle **Confirm signup** pour que son lien pointe vers :
 
    ```html
@@ -36,6 +40,8 @@ La clé `sb_publishable_...` est publique par conception, mais ce projet la cons
    ```
 
 Le lien de confirmation crée une session serveur et redirige vers `/dashboard`. Le lien de récupération ouvre `/reset-password`. Configurer un SMTP adapté à la production afin d’assurer la délivrabilité et les limites d’envoi des e-mails.
+
+Utiliser ces liens `TokenHash` dans les modèles au lieu du lien `{{ .ConfirmationURL }}` par défaut : ils évitent de renvoyer les jetons de session dans un long fragment d’URL.
 
 ## Périmètre actuel
 

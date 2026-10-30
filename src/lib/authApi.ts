@@ -19,7 +19,16 @@ async function request<T extends AuthResponse>(
     body: body ? JSON.stringify(body) : undefined,
   })
 
-  const result = await response.json().catch(() => ({})) as T
+  let result: T
+  try {
+    result = await response.json() as T
+  } catch {
+    throw new Error(
+      response.status === 404
+        ? 'La fonction Vercel /api/auth est introuvable. Redéployez la dernière version du projet.'
+        : 'Réponse invalide du serveur d’authentification. Vérifiez le déploiement Vercel.',
+    )
+  }
   if (!response.ok) {
     throw new Error(result.error ?? 'Le service d’authentification est indisponible.')
   }

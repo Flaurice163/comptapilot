@@ -162,6 +162,28 @@ function authError(payload: AuthPayload) {
   return payload.message ?? payload.msg ?? payload.error_description ?? payload.error ?? ''
 }
 
+function signupError(status: number, payload: AuthPayload) {
+  const message = authError(payload).toLowerCase()
+
+  if (status === 429) return 'Trop de tentatives. Attendez quelques minutes avant de réessayer.'
+  if (message.includes('already') || message.includes('registered')) {
+    return 'Cette adresse e-mail est déjà utilisée.'
+  }
+  if (message.includes('redirect') || message.includes('url')) {
+    return 'Supabase refuse l’URL de retour. Vérifiez Authentication → URL Configuration et ajoutez https://comptapilot.vercel.app/api/auth.'
+  }
+  if (message.includes('email') && (message.includes('disabled') || message.includes('provider'))) {
+    return 'L’inscription par e-mail est désactivée dans Supabase Auth.'
+  }
+  if (message.includes('password')) {
+    return 'Le mot de passe ne respecte pas les exigences configurées dans Supabase.'
+  }
+  if (status >= 500) {
+    return 'Supabase n’a pas pu envoyer l’e-mail de confirmation. Vérifiez la configuration e-mail/SMTP du projet Supabase.'
+  }
+  return 'Supabase a refusé la création du compte. Vérifiez les paramètres Auth et réessayez.'
+}
+
 async function currentSession(req: VercelRequest, res: VercelResponse) {
   const accessToken = cookieValue(req, ACCESS_COOKIE)
   const refreshToken = cookieValue(req, REFRESH_COOKIE)
@@ -320,11 +342,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       }),
     })
     if (!result.response.ok) {
-      const message = authError(result.payload).toLowerCase()
-      const error = message.includes('already') || message.includes('registered')
-        ? 'Cette adresse e-mail est déjà utilisée.'
-        : 'Impossible de créer le compte. Vérifiez les informations et réessayez.'
-      json(res, result.response.status === 429 ? 429 : 400, { error })
+      console.error('Supabase signup rejected:', {
+        status: result.response.status,
+        code: result.payload.code ?? 'unknown',
+      })
+      json(res, result.response.status === 429 ? 429 : 400, {
+        error: signupError(result.response.status, result.payload),
+      })
       return
     }
     json(res, 200, { success: true })
