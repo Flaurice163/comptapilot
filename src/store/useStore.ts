@@ -3,7 +3,7 @@ import type {
   User, Company, Account, JournalEntry, JournalEntryLine,
 } from '../types'
 import {
-  authenticate, changePassword, endSession, getSession, registerAccount,
+  authenticate, changePassword, completeBrowserCallback, endSession, getSession, registerAccount,
   sendPasswordRecovery,
 } from '../lib/authApi'
 import { generateId } from '../lib/utils'
@@ -53,6 +53,11 @@ export const useStore = create<AppState>()((set, get) => ({
   initializeAuth: async () => {
     set({ authStatus: 'loading', authError: null })
     try {
+      const callbackUser = await completeBrowserCallback()
+      if (callbackUser) {
+        set({ user: callbackUser, isAuthenticated: true, authStatus: 'ready' })
+        return
+      }
       const { user } = await getSession()
       set({ user, isAuthenticated: Boolean(user), authStatus: 'ready' })
     } catch (error) {

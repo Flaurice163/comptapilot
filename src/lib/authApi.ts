@@ -27,7 +27,42 @@ async function request<T extends AuthResponse>(
 }
 
 export function getSession() {
-  return request<{ user: User | null }>('GET')
+  return request<{ user: User | null; redirectTo?: string }>('GET')
+}
+
+export async function completeBrowserCallback(): Promise<User | null> {
+  const fragment = window.location.hash
+  if (!fragment) return null
+
+  const params = new URLSearchParams(fragment.slice(1))
+  const accessToken = params.get('access_token')
+  const refreshToken = params.get('refresh_token')
+  const type = params.get('type')
+  const expiresIn = Number(params.get('expires_in'))
+  if (!accessToken || !refreshToken || (type !== 'signup' && type !== 'recovery')) {
+    return null
+  }
+
+  window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`)
+
+  try {
+    const result = await request<{ user: User }>('POST', {
+      action: 'complete-callback',
+      accessToken,
+      refreshToken,
+      expiresIn: String(Number.isFinite(expiresIn) ? expiresIn : 3600),
+      type,
+    })
+    const destination = type === 'recovery' ? '/reset-password' : '/dashboard'
+    window.history.replaceState({}, document.title, destination)
+    return result.user
+  } catch {
+    const destination = type === 'recovery'
+      ? '/forgot-password?authError=recovery'
+      : '/login?authError=confirmation'
+    window.history.replaceState({}, document.title, destination)
+    return null
+  }
 }
 
 export function authenticate(email: string, password: string) {

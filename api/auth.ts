@@ -36,6 +36,10 @@ type ApiBody = {
   password?: string
   fullName?: string
   companyName?: string
+  accessToken?: string
+  refreshToken?: string
+  expiresIn?: string
+  type?: string
 }
 
 const ACCESS_COOKIE = 'comptapilot_access'
@@ -243,6 +247,36 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const body = parseBody(req.body)
   if (!body) {
     json(res, 400, { error: 'Requête invalide.' })
+    return
+  }
+
+  if (body.action === 'complete-callback') {
+    if (
+      typeof body.accessToken !== 'string' || body.accessToken.length > 8192 ||
+      typeof body.refreshToken !== 'string' || body.refreshToken.length > 8192 ||
+      (body.type !== 'signup' && body.type !== 'recovery')
+    ) {
+      json(res, 400, { error: 'La confirmation du lien est invalide.' })
+      return
+    }
+
+    const verified = await supabaseRequest('/user', {
+      method: 'GET',
+    }, body.accessToken)
+    if (!verified.response.ok || !verified.payload.id) {
+      json(res, 401, { error: 'Le lien de confirmation est expiré ou invalide.' })
+      return
+    }
+
+    const expiresIn = Number(body.expiresIn)
+    const session: AuthSession = {
+      access_token: body.accessToken,
+      refresh_token: body.refreshToken,
+      expires_in: Number.isFinite(expiresIn) ? Math.min(Math.max(expiresIn, 60), 86400) : 3600,
+      user: verified.payload as AuthUser,
+    }
+    setSessionCookies(req, res, session)
+    json(res, 200, { user: userForClient(session.user) })
     return
   }
 
