@@ -43,7 +43,7 @@ export default function ParametresPage() {
             {[
               { label: 'Version', value: '1.0.0 — MVP Phase 1' },
               { label: 'Plan comptable', value: 'PCG 2005 Madagascar' },
-              { label: 'Devise par défaut', value: company?.currency ?? 'MGA (Ariary)' },
+              { label: 'Devise par défaut', value: 'MGA — Ariary (Ar)' },
               { label: 'Environnement', value: 'Démonstration locale' },
             ].map((row) => (
               <div key={row.label} className="flex justify-between py-2 border-b last:border-0">

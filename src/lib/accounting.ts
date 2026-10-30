@@ -8,6 +8,7 @@ import type {
   DashboardKPI,
   Period,
 } from '../types'
+import { isBalanced } from './utils'
 
 // ============================================================
 // GRAND LIVRE
@@ -202,7 +203,7 @@ export function computeBilan(gl: GrandLivreAccount[]): Bilan {
   return {
     actif: { immobilisations, stocks, creances, tresorerie, total: totalActif },
     passif: { capitaux, dettes, resultat: cr.resultat, total: totalPassif },
-    is_balanced: Math.abs(totalActif - totalPassif) < 1,
+    is_balanced: isBalanced(totalActif, totalPassif),
   }
 }
 

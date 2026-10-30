@@ -98,20 +98,15 @@ export default function EntreprisePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Devise</Label>
+              <Label htmlFor="currency">Devise de référence</Label>
               <Input
                 id="currency"
-                value={form.currency}
-                onChange={(e) => handleChange('currency', e.target.value)}
-                placeholder="MGA"
-                list="currencies"
+                value="MGA — Ariary (Ar)"
+                disabled
               />
-              <datalist id="currencies">
-                <option value="MGA" />
-                <option value="EUR" />
-                <option value="USD" />
-              </datalist>
-              <p className="text-xs text-muted-foreground">Par défaut : MGA (Ariary malgache)</p>
+              <p className="text-xs text-muted-foreground">
+                Les montants sont affichés en Ariary (Ar) avec deux décimales.
+              </p>
             </div>
           </div>
         </CardContent>

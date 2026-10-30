@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useStore } from '@/store/useStore'
 
@@ -5,6 +6,7 @@ import { useStore } from '@/store/useStore'
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 
 // App layout
 import AppLayout from '@/components/layout/AppLayout'
@@ -36,6 +38,33 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const authStatus = useStore((s) => s.authStatus)
+  const authError = useStore((s) => s.authError)
+  const initializeAuth = useStore((s) => s.initializeAuth)
+
+  useEffect(() => {
+    void initializeAuth()
+  }, [initializeAuth])
+
+  if (authStatus === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        Vérification de votre session…
+      </div>
+    )
+  }
+
+  if (authStatus === 'error') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-destructive">{authError ?? 'Impossible de vérifier votre session.'}</p>
+        <button className="text-primary underline" onClick={() => void initializeAuth()}>
+          Réessayer
+        </button>
+      </div>
+    )
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -64,6 +93,7 @@ export default function App() {
             </PublicRoute>
           }
         />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected app routes */}
         <Route

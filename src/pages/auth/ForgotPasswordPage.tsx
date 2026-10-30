@@ -5,14 +5,27 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useStore } from '@/store/useStore'
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false)
   const [email, setEmail] = useState('')
+  const [error, setError] = useState(() =>
+    new URLSearchParams(window.location.search).get('authError') === 'recovery'
+      ? 'Le lien de récupération est invalide ou expiré. Demandez-en un nouveau.'
+      : '',
+  )
+  const [loading, setLoading] = useState(false)
+  const requestPasswordReset = useStore((s) => s.requestPasswordReset)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setError('')
+    setLoading(true)
+    const result = await requestPasswordReset(email)
+    setLoading(false)
+    if (result.success) setSubmitted(true)
+    else setError(result.error ?? 'Impossible d’envoyer le lien de récupération.')
   }
 
   return (
@@ -57,13 +70,24 @@ export default function ForgotPasswordPage() {
                     placeholder="vous@exemple.mg"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     required
                   />
                 </div>
 
-                <Button type="submit" className="w-full">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Envoyer le lien
+                {error && (
+                  <div className="rounded-md bg-destructive/10 text-destructive text-sm px-3 py-2 border border-destructive/20">
+                    {error}
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Envoi en cours…' : (
+                    <>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Envoyer le lien
+                    </>
+                  )}
                 </Button>
 
                 <Link to="/login">

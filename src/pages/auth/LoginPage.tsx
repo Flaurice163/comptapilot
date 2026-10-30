@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { LogIn, Eye, EyeOff, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,11 +9,16 @@ import { useStore } from '@/store/useStore'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const login = useStore((s) => s.login)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() =>
+    searchParams.get('authError') === 'confirmation'
+      ? 'Le lien de confirmation est invalide ou expiré. Demandez un nouveau lien.'
+      : '',
+  )
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,11 +32,6 @@ export default function LoginPage() {
     } else {
       setError(result.error ?? 'Erreur de connexion.')
     }
-  }
-
-  const fillDemo = () => {
-    setEmail('demo@comptapilot.mg')
-    setPassword('demo1234')
   }
 
   return (
@@ -118,24 +118,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Demo shortcut */}
-            <div className="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
-              <p className="text-xs text-indigo-700 font-medium mb-2">Accès démonstration</p>
-              <p className="text-xs text-indigo-600 mb-2">
-                Email : <code className="font-mono">demo@comptapilot.mg</code><br />
-                Mot de passe : <code className="font-mono">demo1234</code>
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full text-indigo-700 border-indigo-200 hover:bg-indigo-100"
-                onClick={fillDemo}
-              >
-                Remplir automatiquement
-              </Button>
-            </div>
 
             <p className="text-center text-sm text-muted-foreground mt-4">
               Pas encore de compte ?{' '}

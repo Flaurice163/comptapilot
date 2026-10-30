@@ -17,7 +17,7 @@ import {
 import { useStore } from '@/store/useStore'
 import type { JournalType, JournalEntryLine } from '@/types'
 import { JOURNAL_LABELS } from '@/types'
-import { formatDate, formatNumber, generateId, isBalanced } from '@/lib/utils'
+import { formatDate, formatNumber, generateId, isBalanced, roundMoney } from '@/lib/utils'
 
 const JOURNAL_TYPES: JournalType[] = ['VENTES', 'ACHATS', 'BANQUE', 'CAISSE', 'OPERATIONS']
 
@@ -84,11 +84,11 @@ export default function JournalPage() {
 
   // Totals
   const totalDebit = useMemo(
-    () => form.lines.reduce((s, l) => s + (parseFloat(l.debit) || 0), 0),
+    () => form.lines.reduce((s, l) => s + roundMoney(parseFloat(l.debit) || 0), 0),
     [form.lines],
   )
   const totalCredit = useMemo(
-    () => form.lines.reduce((s, l) => s + (parseFloat(l.credit) || 0), 0),
+    () => form.lines.reduce((s, l) => s + roundMoney(parseFloat(l.credit) || 0), 0),
     [form.lines],
   )
   const balanced = isBalanced(totalDebit, totalCredit) && totalDebit > 0
@@ -185,8 +185,8 @@ export default function JournalPage() {
           account_number: l.account_number,
           account_label: acc?.label ?? l.account_number,
           label: l.label || form.label,
-          debit: parseFloat(l.debit) || 0,
-          credit: parseFloat(l.credit) || 0,
+          debit: roundMoney(parseFloat(l.debit) || 0),
+          credit: roundMoney(parseFloat(l.credit) || 0),
         }
       })
 
@@ -529,7 +529,7 @@ export default function JournalPage() {
                           <Input
                             type="number"
                             min="0"
-                            step="1"
+                            step="0.01"
                             value={line.debit}
                             onChange={(e) => {
                               updateLine(line.id, 'debit', e.target.value)
@@ -543,7 +543,7 @@ export default function JournalPage() {
                           <Input
                             type="number"
                             min="0"
-                            step="1"
+                            step="0.01"
                             value={line.credit}
                             onChange={(e) => {
                               updateLine(line.id, 'credit', e.target.value)

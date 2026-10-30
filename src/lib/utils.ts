@@ -5,19 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency = 'MGA'): string {
-  return new Intl.NumberFormat('fr-MG', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
+export function formatCurrency(amount: number): string {
+  return `${formatNumber(amount)} Ar`
 }
 
 export function formatNumber(amount: number): string {
   return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 
@@ -45,7 +40,11 @@ export function generateReference(prefix: string, count: number): string {
 }
 
 export function isBalanced(debit: number, credit: number): boolean {
-  return Math.abs(debit - credit) < 0.001
+  return Math.round(debit * 100) === Math.round(credit * 100)
+}
+
+export function roundMoney(amount: number): number {
+  return Math.round((amount + Number.EPSILON) * 100) / 100
 }
 
 export function sumArray(arr: number[]): number {

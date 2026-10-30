@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select'
 import { useStore } from '@/store/useStore'
 import { computeGrandLivre } from '@/lib/accounting'
-import { formatDate, formatNumber } from '@/lib/utils'
+import { formatDate, formatNumber, isBalanced } from '@/lib/utils'
 import type { AccountClass } from '@/types'
 import { CLASS_LABELS } from '@/types'
 
@@ -136,7 +136,7 @@ export default function GrandLivrePage() {
         <Card>
           <CardContent className="pt-4 pb-4">
             <p className="text-xs text-muted-foreground">Solde net</p>
-            <p className={`text-xl font-bold mt-1 ${Math.abs(totals.debit - totals.credit) < 1 ? 'text-green-600' : 'text-orange-600'}`}>
+            <p className={`text-xl font-bold mt-1 ${isBalanced(totals.debit, totals.credit) ? 'text-green-600' : 'text-orange-600'}`}>
               {formatNumber(totals.debit - totals.credit)} Ar
             </p>
           </CardContent>

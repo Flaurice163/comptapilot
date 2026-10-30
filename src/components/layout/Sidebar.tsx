@@ -34,9 +34,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const company = useStore((s) => s.company)
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    const result = await logout()
+    if (!result.success) {
+      window.alert(result.error ?? 'Impossible de fermer la session.')
+      return
+    }
     navigate('/login')
+    if (result.warning) window.alert(result.warning)
   }
 
   const sidebarContent = (

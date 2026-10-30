@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { useStore } from '@/store/useStore'
 import { computeGrandLivre, computeBalance } from '@/lib/accounting'
-import { formatNumber } from '@/lib/utils'
+import { formatNumber, isBalanced } from '@/lib/utils'
 import type { AccountClass } from '@/types'
 import { CLASS_LABELS } from '@/types'
 
@@ -64,7 +64,7 @@ export default function BalancePage() {
     [balance],
   )
 
-  const isGlobalBalanced = Math.abs(globalTotals.debit - globalTotals.credit) < 1
+  const isGlobalBalanced = isBalanced(globalTotals.debit, globalTotals.credit)
 
   return (
     <div className="space-y-6">
@@ -243,9 +243,9 @@ export default function BalancePage() {
                   </td>
                 </tr>
                 {/* Vérification équilibre */}
-                <tr className={`text-sm ${Math.abs(totals.debit - totals.credit) < 1 ? 'bg-green-50' : 'bg-red-50'}`}>
+                <tr className={`text-sm ${isBalanced(totals.debit, totals.credit) ? 'bg-green-50' : 'bg-red-50'}`}>
                   <td colSpan={6} className="px-4 py-2 text-center">
-                    {Math.abs(totals.debit - totals.credit) < 1 ? (
+                    {isBalanced(totals.debit, totals.credit) ? (
                       <span className="text-green-700 flex items-center justify-center gap-2">
                         <CheckCircle2 className="w-4 h-4" />
                         Total débit = Total crédit

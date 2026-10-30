@@ -168,6 +168,7 @@ export default function AnalysePage() {
                   <Input
                     type="number"
                     min="0"
+                    step="0.01"
                     value={simPrix}
                     onChange={(e) => setSimPrix(e.target.value)}
                     placeholder="10 000"
@@ -178,6 +179,7 @@ export default function AnalysePage() {
                   <Input
                     type="number"
                     min="0"
+                    step="0.01"
                     value={simPrixNouveau}
                     onChange={(e) => setSimPrixNouveau(e.target.value)}
                     placeholder="11 000"
@@ -189,6 +191,7 @@ export default function AnalysePage() {
                 <Input
                   type="number"
                   min="0"
+                  step="0.01"
                   value={simQte}
                   onChange={(e) => setSimQte(e.target.value)}
                   placeholder="1 000"
